@@ -41,4 +41,16 @@ func (c Customer) ToDTO() dto.CustomerResponse {
 // FindAll: returns all the customers or an error
 type CustomerRepository interface {
 	FindAll() ([]Customer, *errs.AppError)
+	Save(Customer) (*Customer, *errs.AppError)
+}
+
+func NewCustomer(c dto.CustomerRequest) Customer {
+	return Customer{
+		ID:          "",
+		Name:        c.Name,
+		City:        c.City,
+		Zipcode:     c.Zipcode,
+		DateofBirth: c.DateofBirth,
+		Status:      "1",
+	}
 }

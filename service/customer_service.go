@@ -11,6 +11,7 @@ import (
 // GetAllCustomer: returns all the customers or an error
 type CustomerService interface {
 	GetAllCustomers() ([]dto.CustomerResponse, *errs.AppError)
+	CreateCustomer(dto.CustomerRequest) (*dto.CustomerResponse, *errs.AppError)
 }
 
 // DefaultCustomerService has methods that call upon dto and domain
@@ -37,4 +38,20 @@ func (s DefaultCustomerService) GetAllCustomers() ([]dto.CustomerResponse, *errs
 		response = append(response, c.ToDTO())
 	}
 	return response, nil
+}
+
+// CreateCustomer validates customer, creates a customer and returns the customer information back with an customer id
+func (s DefaultCustomerService) CreateCustomer(c dto.CustomerRequest) (*dto.CustomerResponse, *errs.AppError) {
+	if err := c.Validate(); err != nil {
+		return nil, err
+	}
+	customer := domain.NewCustomer(c)
+	newCustomer, err := s.repo.Save(customer)
+	if err != nil {
+		return nil, err
+	}
+
+	response := newCustomer.ToDTO()
+
+	return &response, nil
 }
