@@ -1,12 +1,16 @@
 package service
 
-import "github.com/jonathanwamsley/banking/domain"
+import (
+	"github.com/jonathanwamsley/banking/domain"
+	"github.com/jonathanwamsley/banking/dto"
+	"github.com/jonathanwamsley/banking/errs"
+)
 
 // CustomerService is an interface that implements
 //
 // GetAllCustomer: returns all the customers or an error
 type CustomerService interface {
-	GetAllCustomers() ([]domain.Customer, error)
+	GetAllCustomers() ([]dto.CustomerResponse, *errs.AppError)
 }
 
 // DefaultCustomerService has methods that call upon dto and domain
@@ -19,11 +23,18 @@ func NewCustomerService(repository domain.CustomerRepository) DefaultCustomerSer
 	return DefaultCustomerService{repository}
 }
 
-// GetAllCustomers returns all the customers or an error
-func (s DefaultCustomerService) GetAllCustomers() ([]domain.Customer, error) {
+// GetAllCustomers returns all the customers as dto response
+//
+// if unsuccessfull, an AppError is sent with the error code and message
+func (s DefaultCustomerService) GetAllCustomers() ([]dto.CustomerResponse, *errs.AppError) {
 	customers, err := s.repo.FindAll()
 	if err != nil {
 		return nil, err
 	}
-	return customers, nil
+
+	response := make([]dto.CustomerResponse, 0)
+	for _, c := range customers {
+		response = append(response, c.ToDTO())
+	}
+	return response, nil
 }

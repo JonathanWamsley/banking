@@ -1,12 +1,14 @@
 package domain
 
+import "github.com/jonathanwamsley/banking/errs"
+
 // CustomerRepositoryStub is used to test basic api functionality before implementing a db
 type CustomerRepositoryStub struct {
 	customers []Customer
 }
 
 // FindAll returns all customers
-func (s CustomerRepositoryStub) FindAll() ([]Customer, error) {
+func (s CustomerRepositoryStub) FindAll() ([]Customer, *errs.AppError) {
 	return s.customers, nil
 }
 
