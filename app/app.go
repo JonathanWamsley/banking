@@ -52,8 +52,8 @@ func init() {
 // it connects the handlers, starts the server, and any other configuration setup
 func Start() {
 	router := mux.NewRouter()
-
 	ch := CustomerHandler{service.NewCustomerService(domain.NewCustomerRepositoryDB(Client))}
 	router.HandleFunc("/customers", ch.GetAllCustomers).Methods(http.MethodGet)
+	router.HandleFunc("/customer", ch.CreateCustomer).Methods(http.MethodPost)
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
