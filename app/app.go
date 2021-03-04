@@ -53,7 +53,7 @@ func init() {
 func Start() {
 	router := mux.NewRouter()
 
-	ch := CustomerHandler{service.NewCustomerService(domain.NewCustomerRepositoryStub())}
+	ch := CustomerHandler{service.NewCustomerService(domain.NewCustomerRepositoryDB(Client))}
 	router.HandleFunc("/customers", ch.GetAllCustomers).Methods(http.MethodGet)
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
