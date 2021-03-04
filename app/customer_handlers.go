@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/jonathanwamsley/banking/dto"
 	"github.com/jonathanwamsley/banking/service"
 )
@@ -34,6 +35,31 @@ func (ch *CustomerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request
 		writeResponse(w, http.StatusNotFound, err.AsMessage())
 	}
 	writeResponse(w, http.StatusOK, customer)
+}
+
+// GetCustomer gets a customer by id
+func (ch *CustomerHandler) GetCustomer(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["customer_id"]
+
+	customer, err := ch.service.GetCustomer(id)
+	if err != nil {
+		writeResponse(w, err.Code, err.AsMessage())
+		return
+	}
+	writeResponse(w, http.StatusOK, customer)
+}
+
+// DeleteCustomer returns a confirmation status deleted if success
+func (ch *CustomerHandler) DeleteCustomer(w http.ResponseWriter, r *http.Request) {
+	customerID := mux.Vars(r)["customer_id"]
+
+	err := ch.service.DeleteCustomer(customerID)
+	if err != nil {
+		writeResponse(w, err.Code, err.AsMessage())
+		return
+	}
+	writeResponse(w, http.StatusOK, map[string]string{"status": "deleted"})
 }
 
 // writeResponse returns the header with an encoded json data as a response

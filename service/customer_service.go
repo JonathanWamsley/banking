@@ -9,9 +9,14 @@ import (
 // CustomerService is an interface that implements
 //
 // GetAllCustomer: returns all the customers or an error
+// CreateCustomer: inserts a new customer into the db
+// GetCustomer: returns a customer by id
+// DeleteCustomer: Removes a customer by id from the db
 type CustomerService interface {
 	GetAllCustomers() ([]dto.CustomerResponse, *errs.AppError)
 	CreateCustomer(dto.CustomerRequest) (*dto.CustomerResponse, *errs.AppError)
+	GetCustomer(id string) (*dto.CustomerResponse, *errs.AppError)
+	DeleteCustomer(string) *errs.AppError
 }
 
 // DefaultCustomerService has methods that call upon dto and domain
@@ -54,4 +59,28 @@ func (s DefaultCustomerService) CreateCustomer(c dto.CustomerRequest) (*dto.Cust
 	response := newCustomer.ToDTO()
 
 	return &response, nil
+}
+
+// GetCustomer returns a single customer by id
+func (s DefaultCustomerService) GetCustomer(id string) (*dto.CustomerResponse, *errs.AppError) {
+	c, err := s.repo.ByID(id)
+	if err != nil {
+		return nil, err
+	}
+	response := c.ToDTO()
+	return &response, nil
+}
+
+// DeleteCustomer first makes sure an id exists, then it removes the customer by id
+func (s DefaultCustomerService) DeleteCustomer(id string) *errs.AppError {
+	_, err := s.repo.ByID(id)
+	if err != nil {
+		return err
+	}
+
+	err = s.repo.Delete(id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

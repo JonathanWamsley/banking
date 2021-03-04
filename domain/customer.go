@@ -39,11 +39,17 @@ func (c Customer) ToDTO() dto.CustomerResponse {
 // CustomerRepository implements:
 //
 // FindAll: returns all the customers or an error
+// Save: returns the customer with an id that was just inserted
+// ById: returns a customer using the customer_id
+// Delete: returns no error on success
 type CustomerRepository interface {
 	FindAll() ([]Customer, *errs.AppError)
 	Save(Customer) (*Customer, *errs.AppError)
+	ByID(string) (*Customer, *errs.AppError)
+	Delete(string) *errs.AppError
 }
 
+// NewCustomer converts a customer request to a customer
 func NewCustomer(c dto.CustomerRequest) Customer {
 	return Customer{
 		ID:          "",
