@@ -13,7 +13,7 @@ type CustomerHandler struct {
 }
 
 // GetAllCustomers returns all customers
-// 
+//
 func (ch *CustomerHandler) GetAllCustomers(w http.ResponseWriter, r *http.Request) {
 	customers, err := ch.service.GetAllCustomers()
 
