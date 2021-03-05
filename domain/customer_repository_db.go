@@ -6,6 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/jonathanwamsley/banking/errs"
+	"github.com/jonathanwamsley/banking/logger"
 )
 
 // the query need
@@ -32,6 +33,7 @@ func (d CustomerRepositoryDB) FindAll() ([]Customer, *errs.AppError) {
 	err := d.client.Select(&customers, findAllCustomers)
 
 	if err != nil {
+		logger.Error("Error while querying customers table " + err.Error())
 		return nil, errs.NewUnexpectedError("Unexpected database error")
 	}
 
@@ -42,11 +44,13 @@ func (d CustomerRepositoryDB) FindAll() ([]Customer, *errs.AppError) {
 func (d CustomerRepositoryDB) Save(c Customer) (*Customer, *errs.AppError) {
 	result, err := d.client.Exec(insertCustomer, c.Name, c.DateofBirth, c.City, c.Zipcode, c.Status)
 	if err != nil {
+		logger.Error("Error while creating new customer " + err.Error())
 		return nil, errs.NewUnexpectedError("Unexpected error from database")
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
+		logger.Error("Error while getting last insert id for customer " + err.Error())
 		return nil, errs.NewUnexpectedError("Unexpected error from database")
 	}
 
@@ -61,10 +65,11 @@ func (d CustomerRepositoryDB) ByID(id string) (*Customer, *errs.AppError) {
 	err := d.client.Get(&c, getCustomer, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			// no need to log queries about missing customers
 			return nil, errs.NewNotFoundError("Customer not found")
-		} else {
-			return nil, errs.NewUnexpectedError("Unexpected database error")
 		}
+		logger.Error("Error while scanning customer " + err.Error())
+		return nil, errs.NewUnexpectedError("Unexpected database error")
 	}
 	return &c, nil
 }
@@ -73,6 +78,7 @@ func (d CustomerRepositoryDB) ByID(id string) (*Customer, *errs.AppError) {
 func (d CustomerRepositoryDB) Delete(id string) *errs.AppError {
 	_, err := d.client.Exec(deleteCustomer, id)
 	if err != nil {
+		logger.Error("Error while trying to delete customer " + err.Error())
 		return errs.NewUnexpectedError("Unexpected error from database")
 	}
 	return nil
