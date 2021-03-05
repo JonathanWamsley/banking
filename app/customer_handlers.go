@@ -19,7 +19,7 @@ func (ch *CustomerHandler) GetAllCustomers(w http.ResponseWriter, r *http.Reques
 	customers, err := ch.service.GetAllCustomers()
 
 	if err != nil {
-		writeResponse(w, http.StatusNotFound, err.AsMessage())
+		writeResponse(w, err.Code, err.AsMessage())
 	}
 	writeResponse(w, http.StatusOK, customers)
 }
@@ -28,11 +28,11 @@ func (ch *CustomerHandler) GetAllCustomers(w http.ResponseWriter, r *http.Reques
 func (ch *CustomerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request) {
 	var customerRequest dto.CustomerRequest
 	if err := json.NewDecoder(r.Body).Decode(&customerRequest); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		writeResponse(w, http.StatusBadRequest, "invalid json")
 	}
 	customer, err := ch.service.CreateCustomer(customerRequest)
 	if err != nil {
-		writeResponse(w, http.StatusNotFound, err.AsMessage())
+		writeResponse(w, err.Code, err.AsMessage())
 	}
 	writeResponse(w, http.StatusOK, customer)
 }
