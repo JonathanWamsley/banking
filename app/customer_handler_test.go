@@ -1,6 +1,8 @@
 package app
 
 import (
+	"bytes"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -150,9 +152,29 @@ func TestCreateCustomerNoError(t *testing.T) {
 	teardown := setup(t)
 	defer teardown()
 
-	mockService.EXPECT().DeleteCustomer("").Return(nil)
-	router.HandleFunc("/customer", ch.DeleteCustomer)
-	request, _ := http.NewRequest(http.MethodDelete, "/customer", nil)
+	json := `{"full_name":"Test Name","city":"test city","zipcode":"123321","date_of_birth":"01/01/2001"}`
+	// create a new reader with that JSON
+	r := ioutil.NopCloser(bytes.NewReader([]byte(json)))
+
+	req := dto.CustomerRequest{
+		Name:        "Test Name",
+		City:        "test city",
+		Zipcode:     "123321",
+		DateofBirth: "01/01/2001",
+	}
+
+	resp := &dto.CustomerResponse{
+		ID:          "1234",
+		Name:        "Test Name",
+		City:        "test city",
+		Zipcode:     "123321",
+		DateofBirth: "01/01/2001",
+		Status:      "active",
+	}
+
+	mockService.EXPECT().CreateCustomer(req).Return(resp, nil)
+	router.HandleFunc("/customer", ch.CreateCustomer)
+	request, _ := http.NewRequest(http.MethodPost, "/customer", r)
 
 	// Act
 	recorder := httptest.NewRecorder()
@@ -160,6 +182,36 @@ func TestCreateCustomerNoError(t *testing.T) {
 
 	// Assert
 	if recorder.Code != http.StatusOK {
+		t.Error("Failed while testing the status code")
+	}
+}
+
+func TestCreateCustomerServerError(t *testing.T) {
+	// Arrange
+	teardown := setup(t)
+	defer teardown()
+
+	json := `{"full_name":"Test Name","city":"test city","zipcode":"123321","date_of_birth":"01/01/2001"}`
+	// create a new reader with that JSON
+	r := ioutil.NopCloser(bytes.NewReader([]byte(json)))
+
+	req := dto.CustomerRequest{
+		Name:        "Test Name",
+		City:        "test city",
+		Zipcode:     "123321",
+		DateofBirth: "01/01/2001",
+	}
+
+	mockService.EXPECT().CreateCustomer(req).Return(nil, errs.NewUnexpectedError("database error"))
+	router.HandleFunc("/customer", ch.CreateCustomer)
+	request, _ := http.NewRequest(http.MethodPost, "/customer", r)
+
+	// Act
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, request)
+
+	// Assert
+	if recorder.Code != http.StatusInternalServerError {
 		t.Error("Failed while testing the status code")
 	}
 }
