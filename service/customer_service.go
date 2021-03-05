@@ -12,10 +12,12 @@ import (
 // CreateCustomer: inserts a new customer into the db
 // GetCustomer: returns a customer by id
 // DeleteCustomer: Removes a customer by id from the db
+//
+// go:generate mockgen -destination=../mocks/service/mockCustomerService.go -package=service github.com/jonathanwamsley/banking/service CustomerService
 type CustomerService interface {
 	GetAllCustomers() ([]dto.CustomerResponse, *errs.AppError)
 	CreateCustomer(dto.CustomerRequest) (*dto.CustomerResponse, *errs.AppError)
-	GetCustomer(id string) (*dto.CustomerResponse, *errs.AppError)
+	GetCustomer(string) (*dto.CustomerResponse, *errs.AppError)
 	DeleteCustomer(string) *errs.AppError
 }
 

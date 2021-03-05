@@ -42,6 +42,7 @@ func (c Customer) ToDTO() dto.CustomerResponse {
 // Save: returns the customer with an id that was just inserted
 // ById: returns a customer using the customer_id
 // Delete: returns no error on success
+// mockgen -destination=mocks/domain/mock_customer_repository.go -package=domain github.com/jonathanwamsley/banking/domain CustomerRepository
 type CustomerRepository interface {
 	FindAll() ([]Customer, *errs.AppError)
 	Save(Customer) (*Customer, *errs.AppError)
