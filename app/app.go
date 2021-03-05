@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"log"
+
 	"net/http"
 	"time"
 
@@ -12,50 +13,49 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/jonathanwamsley/banking/config"
 	"github.com/jonathanwamsley/banking/domain"
+	"github.com/jonathanwamsley/banking/logger"
 	"github.com/jonathanwamsley/banking/service"
 )
 
-var (
-	// Client holds the db connection.
-	Client *sqlx.DB
-)
+// getDbClient loads and returns db connection. The db makes connection is confirmed via Ping
+func getDbClient(connectionInfo string) *sqlx.DB {
 
-// loads the config variables and makes sure a database connection can be established
-func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Printf("no .env file found")
-	}
-	conf := config.NewConfig()
+	// dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPasswd, dbAddr, dbPort, dbName)
 
-	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s)/%s",
-		conf.MySQL.Username,
-		conf.MySQL.Password,
-		conf.MySQL.Host,
-		conf.MySQL.Schema,
-	)
-
-	var err error
-	Client, err = sqlx.Open("mysql", dataSourceName)
+	client, err := sqlx.Open("mysql", connectionInfo)
 	if err != nil {
 		panic(err)
 	}
-	if err = Client.Ping(); err != nil {
+
+	if err = client.Ping(); err != nil {
 		panic(err)
 	}
-	Client.SetConnMaxLifetime(time.Minute * 3)
-	Client.SetMaxOpenConns(10)
-	Client.SetMaxIdleConns(10)
-	log.Println("database successfully configured")
+	// See "Important settings" section.
+	client.SetConnMaxLifetime(time.Minute * 3)
+	client.SetMaxOpenConns(10)
+	client.SetMaxIdleConns(10)
+	return client
 }
 
 // Start helps decouples from running the whole entire application
 // it connects the handlers, starts the server, and any other configuration setup
 func Start() {
+	if err := godotenv.Load(); err != nil {
+		logger.Fatal("no .env file found")
+		panic(err)
+	}
+	config := config.NewConfig()
+	dbClient := getDbClient(config.GetMySQLInfo())
+	serverInfo := config.GetServerInfo()
+
 	router := mux.NewRouter()
-	ch := CustomerHandler{service.NewCustomerService(domain.NewCustomerRepositoryDB(Client))}
+	ch := CustomerHandler{service.NewCustomerService(domain.NewCustomerRepositoryDB(dbClient))}
+
 	router.HandleFunc("/customers", ch.GetAllCustomers).Methods(http.MethodGet)
 	router.HandleFunc("/customer", ch.CreateCustomer).Methods(http.MethodPost)
 	router.HandleFunc("/customer/{customer_id:[0-9]+}", ch.GetCustomer).Methods(http.MethodGet)
 	router.HandleFunc("/customer/{customer_id:[0-9]+}", ch.DeleteCustomer).Methods(http.MethodDelete)
-	log.Fatal(http.ListenAndServe(":8080", router))
+
+	logger.Info(fmt.Sprintf("Starting server on %s ...", serverInfo))
+	log.Fatal(http.ListenAndServe(serverInfo, router))
 }
