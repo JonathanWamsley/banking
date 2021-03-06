@@ -9,12 +9,14 @@ import (
 // AccountService is an interface that implements
 //
 // CreateAccount: creates a new account for a given customer and returns account id back on success
+// GetAccount: gets the user checking and savings account
 type AccountService interface {
 	CreateAccount(dto.CreateAccountRequest) (*dto.CreateAccountResponse, *errs.AppError)
+	GetAccount(id string) ([]dto.GetAccountResponse, *errs.AppError)
 }
 
 // DefaultAccountService has methods that call dto and the domain
-type DefaultAccountService struct{
+type DefaultAccountService struct {
 	repo domain.AccountRepository
 }
 
@@ -28,11 +30,25 @@ func (s DefaultAccountService) CreateAccount(req dto.CreateAccountRequest) (*dto
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	
+
 	account := domain.NewAccount(req)
 	newAccount, err := s.repo.Save(account)
 	if err != nil {
 		return nil, err
 	}
 	return newAccount.ToCreateAccountResponseDTO(), nil
+}
+
+// GetAccount manages the account dto and database interaction
+func (s DefaultAccountService) GetAccount(id string) ([]dto.GetAccountResponse, *errs.AppError) {
+	accounts, err := s.repo.ByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	response := make([]dto.GetAccountResponse, 0)
+	for _, a := range accounts {
+		response = append(response, a.ToGetAccountResponseDTO())
+	}
+	return response, nil
 }

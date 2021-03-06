@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"database/sql"
 	"strconv"
 
 	"github.com/jmoiron/sqlx"
@@ -11,6 +12,7 @@ import (
 // The query statements
 const (
 	CreateAccount = "insert into accounts(customer_id, opening_date, account_type, amount, status) values (?, ?, ?, ?, ?);"
+	GetAccounts   = "select account_id, customer_id, opening_date, account_type, amount from accounts where customer_id = ?;"
 )
 
 // AccountRepositoryDB holds the sql client connection
@@ -19,7 +21,7 @@ type AccountRepositoryDB struct {
 }
 
 // NewAccountRepositoryDB creates a new AccountRepositoryDB to call sql methods
-func NewAccountRepositoryDB(repo *sqlx.DB) AccountRepositoryDB{
+func NewAccountRepositoryDB(repo *sqlx.DB) AccountRepositoryDB {
 	return AccountRepositoryDB{repo}
 }
 
@@ -37,4 +39,20 @@ func (d AccountRepositoryDB) Save(a Account) (*Account, *errs.AppError) {
 	}
 	a.AccountID = strconv.FormatInt(id, 10)
 	return &a, nil
+}
+
+// ByID returns all the accounts of a customers id from the database
+func (d AccountRepositoryDB) ByID(id string) ([]Account, *errs.AppError) {
+	accounts := make([]Account, 0)
+	err := d.client.Select(&accounts, GetAccounts, id)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// no need to log queries about missing customers
+			return nil, errs.NewNotFoundError("Customer has no accounts")
+		}
+		logger.Error("Error while querying account table " + err.Error())
+		return nil, errs.NewUnexpectedError("Unexpected database error")
+	}
+	return accounts, nil
 }
