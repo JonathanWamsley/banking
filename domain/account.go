@@ -23,10 +23,14 @@ type Account struct {
 // Save: creates a new account for a customer, and returns customer account id
 // ById: searches for accounts by a user_id
 // Delete: deletes an account using a customer id and account type
+// SaveTransaction: makes a transaction in a bank account and returns new account total
+// FindBy: finds a specific account information
 type AccountRepository interface {
 	Save(Account) (*Account, *errs.AppError)
-	ByID(string) ([]Account, *errs.AppError)
+	ByID(customerID string) ([]Account, *errs.AppError)
 	Delete(id string, accountType string) *errs.AppError
+	SaveTransaction(transaction Transaction) (*Transaction, *errs.AppError)
+	FindBy(accountID string) (*Account, *errs.AppError)
 }
 
 // ToCreateAccountResponseDTO converts account from database to account response for user
@@ -54,4 +58,12 @@ func NewAccount(a dto.CreateAccountRequest) Account {
 		Amount:      a.Amount,
 		Status:      "1",
 	}
+}
+
+// CanWithdraw checks if an transaction can be made
+func (a Account) CanWithdraw(amount float64) bool {
+	if a.Amount < amount {
+		return false
+	}
+	return true
 }

@@ -2,21 +2,26 @@ package service
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jonathanwamsley/banking/domain"
 	"github.com/jonathanwamsley/banking/dto"
 	"github.com/jonathanwamsley/banking/errs"
 )
 
+const dbTSLayout = "2006-01-02 15:04:05"
+
 // AccountService is an interface that implements
 //
 // CreateAccount: creates a new account for a given customer and returns account id back on success
 // GetAccount: gets the user checking and savings account
 // DeleteAccount: deletes a user account
+// MakeTransaction: a customer creates a transation into an account and receive the new balance
 type AccountService interface {
 	CreateAccount(dto.CreateAccountRequest) (*dto.CreateAccountResponse, *errs.AppError)
 	GetAccount(id string) ([]dto.GetAccountResponse, *errs.AppError)
 	DeleteAccount(id string, accountType string) *errs.AppError
+	MakeTransaction(request dto.MakeTransactionRequest) (*dto.MakeTransactionResponse, *errs.AppError)
 }
 
 // DefaultAccountService has methods that call dto and the domain
@@ -82,4 +87,36 @@ func (s DefaultAccountService) DeleteAccount(id string, accountType string) *err
 		return err
 	}
 	return nil
+}
+
+// MakeTransaction makes a withdrawal or deposit to an account. It then returns the updated balance for the account
+func (s DefaultAccountService) MakeTransaction(req dto.MakeTransactionRequest) (*dto.MakeTransactionResponse, *errs.AppError) {
+	// incoming request validation
+	err := req.Validate()
+	if err != nil {
+		return nil, err
+	}
+	// server side validation for checking the available balance in the account
+	if req.IsTransactionTypeWithdrawal() {
+		account, err := s.repo.FindBy(req.AccountID)
+		if err != nil {
+			return nil, err
+		}
+		if !account.CanWithdraw(req.Amount) {
+			return nil, errs.NewValidationError("Insufficient balance in the account")
+		}
+	}
+	// if all is well, build the domain object & save the transaction
+	t := domain.Transaction{
+		AccountID:       req.AccountID,
+		Amount:          req.Amount,
+		TransactionType: req.TransactionType,
+		TransactionDate: time.Now().Format(dbTSLayout),
+	}
+	transaction, appError := s.repo.SaveTransaction(t)
+	if appError != nil {
+		return nil, appError
+	}
+	response := transaction.ToDTO()
+	return &response, nil
 }
