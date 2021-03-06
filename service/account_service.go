@@ -10,9 +10,11 @@ import (
 //
 // CreateAccount: creates a new account for a given customer and returns account id back on success
 // GetAccount: gets the user checking and savings account
+// DeleteAccount: deletes a user account
 type AccountService interface {
 	CreateAccount(dto.CreateAccountRequest) (*dto.CreateAccountResponse, *errs.AppError)
 	GetAccount(id string) ([]dto.GetAccountResponse, *errs.AppError)
+	DeleteAccount(id string, accountType string) *errs.AppError
 }
 
 // DefaultAccountService has methods that call dto and the domain
@@ -51,4 +53,13 @@ func (s DefaultAccountService) GetAccount(id string) ([]dto.GetAccountResponse, 
 		response = append(response, a.ToGetAccountResponseDTO())
 	}
 	return response, nil
+}
+
+// DeleteAccount deletes an account using a customer_id and account_type
+func (s DefaultAccountService) DeleteAccount(id string, accountType string) *errs.AppError {
+	err := s.repo.Delete(id, accountType)
+	if err != nil {
+		return err
+	}
+	return nil
 }

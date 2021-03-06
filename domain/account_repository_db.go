@@ -11,8 +11,9 @@ import (
 
 // The query statements
 const (
-	CreateAccount = "insert into accounts(customer_id, opening_date, account_type, amount, status) values (?, ?, ?, ?, ?);"
-	GetAccounts   = "select account_id, customer_id, opening_date, account_type, amount from accounts where customer_id = ?;"
+	createAccount = "insert into accounts(customer_id, opening_date, account_type, amount, status) values (?, ?, ?, ?, ?);"
+	getAccounts   = "select account_id, customer_id, opening_date, account_type, amount from accounts where customer_id = ?;"
+	deleteAccount = "delete from accounts where customer_id = ? and account_type = ?;"
 )
 
 // AccountRepositoryDB holds the sql client connection
@@ -27,7 +28,7 @@ func NewAccountRepositoryDB(repo *sqlx.DB) AccountRepositoryDB {
 
 // Save creates a new account for a customer. The account id is returned
 func (d AccountRepositoryDB) Save(a Account) (*Account, *errs.AppError) {
-	result, err := d.client.Exec(CreateAccount, a.CustomerID, a.OpeningDate, a.AccountType, a.Amount, a.Status)
+	result, err := d.client.Exec(createAccount, a.CustomerID, a.OpeningDate, a.AccountType, a.Amount, a.Status)
 	if err != nil {
 		logger.Error("error while creating new account " + err.Error())
 		return nil, errs.NewUnexpectedError("unexpected error from database")
@@ -44,7 +45,7 @@ func (d AccountRepositoryDB) Save(a Account) (*Account, *errs.AppError) {
 // ByID returns all the accounts of a customers id from the database
 func (d AccountRepositoryDB) ByID(id string) ([]Account, *errs.AppError) {
 	accounts := make([]Account, 0)
-	err := d.client.Select(&accounts, GetAccounts, id)
+	err := d.client.Select(&accounts, getAccounts, id)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -55,4 +56,14 @@ func (d AccountRepositoryDB) ByID(id string) ([]Account, *errs.AppError) {
 		return nil, errs.NewUnexpectedError("Unexpected database error")
 	}
 	return accounts, nil
+}
+
+// Delete returns nil for a customer of a given account type
+func (d AccountRepositoryDB) Delete(id string, accountType string) *errs.AppError {
+	_, err := d.client.Exec(deleteAccount, id, accountType)
+	if err != nil {
+		logger.Error("Error while trying to delete account " + err.Error())
+		return errs.NewUnexpectedError("Unexpected error from database")
+	}
+	return nil
 }
