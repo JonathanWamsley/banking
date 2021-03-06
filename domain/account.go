@@ -25,6 +25,7 @@ type Account struct {
 // Delete: deletes an account using a customer id and account type
 // SaveTransaction: makes a transaction in a bank account and returns new account total
 // FindBy: finds a specific account information
+// mockgen -destination=mocks/domain/mock_account_repository.go -package=domain github.com/jonathanwamsley/banking/domain AccountRepository
 type AccountRepository interface {
 	Save(Account) (*Account, *errs.AppError)
 	ByID(customerID string) ([]Account, *errs.AppError)
