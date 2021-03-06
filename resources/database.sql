@@ -18,3 +18,21 @@ INSERT INTO `customers` VALUES
 	(2003,'Ben','1988-01-04','Manchester, NH','03102',0),
 	(2004,'Nina','1988-05-14','Clarkston, MI','48348',1),
 	(2005,'Osman','1988-11-08','Hyattsville, MD','20782',0);
+
+DROP TABLE IF EXISTS `accounts`;
+CREATE TABLE `accounts` (
+  `account_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `opening_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `account_type` varchar(10) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`account_id`),
+  KEY `accounts_FK` (`customer_id`),
+  CONSTRAINT `accounts_FK` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=95471 DEFAULT CHARSET=latin1;
+INSERT INTO `accounts` VALUES
+	(95470,2000,'2020-08-22 10:20:06', 'saving', 6823.23, 1),
+	(95471,2002,'2020-08-09 10:27:22', 'checking', 3342.96, 1),
+  (95472,2001,'2020-08-09 10:35:22', 'saving', 7000, 1),
+  (95473,2001,'2020-08-09 10:38:22', 'saving', 5861.86, 1);

@@ -50,11 +50,14 @@ func Start() {
 
 	router := mux.NewRouter()
 	ch := CustomerHandler{service.NewCustomerService(domain.NewCustomerRepositoryDB(dbClient))}
+	ah := AccountHandler{service.NewAccountService(domain.NewAccountRepositoryDB(dbClient))}
 
 	router.HandleFunc("/customers", ch.GetAllCustomers).Methods(http.MethodGet)
 	router.HandleFunc("/customer", ch.CreateCustomer).Methods(http.MethodPost)
 	router.HandleFunc("/customer/{customer_id:[0-9]+}", ch.GetCustomer).Methods(http.MethodGet)
 	router.HandleFunc("/customer/{customer_id:[0-9]+}", ch.DeleteCustomer).Methods(http.MethodDelete)
+
+	router.HandleFunc("/customers/{customer_id:[0-9]+}/account", ah.CreateAccount).Methods(http.MethodPost)
 
 	logger.Info(fmt.Sprintf("Starting server on %s ...", serverInfo))
 	log.Fatal(http.ListenAndServe(serverInfo, router))
