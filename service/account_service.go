@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/jonathanwamsley/banking/domain"
 	"github.com/jonathanwamsley/banking/dto"
 	"github.com/jonathanwamsley/banking/errs"
@@ -29,6 +31,14 @@ func NewAccountService(repository domain.AccountRepository) DefaultAccountServic
 
 // CreateAccount manages the account dto and database interaction
 func (s DefaultAccountService) CreateAccount(req dto.CreateAccountRequest) (*dto.CreateAccountResponse, *errs.AppError) {
+
+	accounts, _ := s.repo.ByID(req.CustomerID)
+	for _, a := range accounts {
+		if a.AccountType == req.AccountType {
+			return nil, errs.NewValidationError(fmt.Sprintf("Error, only one %s type is allow", req.AccountType))
+		}
+	}
+
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
@@ -57,7 +67,17 @@ func (s DefaultAccountService) GetAccount(id string) ([]dto.GetAccountResponse, 
 
 // DeleteAccount deletes an account using a customer_id and account_type
 func (s DefaultAccountService) DeleteAccount(id string, accountType string) *errs.AppError {
-	err := s.repo.Delete(id, accountType)
+	accounts, err := s.repo.ByID(id)
+	if err != nil {
+		return err
+	}
+	for _, a := range accounts {
+		if a.AccountType == accountType && a.Amount != 0 {
+			return errs.NewValidationError("Account must have a balance of 0 to close")
+		}
+	}
+
+	err = s.repo.Delete(id, accountType)
 	if err != nil {
 		return err
 	}

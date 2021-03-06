@@ -60,10 +60,15 @@ func (d AccountRepositoryDB) ByID(id string) ([]Account, *errs.AppError) {
 
 // Delete returns nil for a customer of a given account type
 func (d AccountRepositoryDB) Delete(id string, accountType string) *errs.AppError {
-	_, err := d.client.Exec(deleteAccount, id, accountType)
+	result, err := d.client.Exec(deleteAccount, id, accountType)
 	if err != nil {
 		logger.Error("Error while trying to delete account " + err.Error())
 		return errs.NewUnexpectedError("Unexpected error from database")
+	}
+
+	rowsChanged, _ := result.RowsAffected()
+	if rowsChanged == 0 {
+		return errs.NewNotFoundError("Account not found")
 	}
 	return nil
 }
