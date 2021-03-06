@@ -8,14 +8,23 @@ import (
 
 // CreateAccountRequest must follow this format to create a new account
 type CreateAccountRequest struct {
-	CustomerID string `json:"customer_id"`
-	AccountType string `json:"account_type"`
-	Amount float64 `json:"amount"`
+	CustomerID  string  `json:"customer_id"`
+	AccountType string  `json:"account_type"`
+	Amount      float64 `json:"amount"`
 }
 
 // CreateAccountResponse must follow this format to return a new account created
 type CreateAccountResponse struct {
 	AccountID string `json:"account_id"`
+}
+
+// GetAccountResponse must follow this format to return a an account
+type GetAccountResponse struct {
+	AccountID   string  `json:"account_id"`
+	CustomerID  string  `json:"customer_id"`
+	OpeningDate string  `json:"opening_date"`
+	AccountType string  `json:"account_type"`
+	Amount      float64 `json:"amount"`
 }
 
 // Validate checks that an a new account being created has
@@ -30,4 +39,3 @@ func (r CreateAccountRequest) Validate() *errs.AppError {
 	}
 	return nil
 }
-

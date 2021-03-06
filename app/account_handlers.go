@@ -30,3 +30,14 @@ func (ah *AccountHandler) CreateAccount(w http.ResponseWriter, r *http.Request) 
 	}
 	writeResponse(w, http.StatusCreated, result)
 }
+
+// GetAccount returns account information for a customer
+func (ah *AccountHandler) GetAccount(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["customer_id"]
+
+	result, err := ah.service.GetAccount(id)
+	if err != nil {
+		writeResponse(w, err.Code, err.Message)
+	}
+	writeResponse(w, http.StatusOK, result)
+}
