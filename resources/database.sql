@@ -36,3 +36,16 @@ INSERT INTO `accounts` VALUES
 	(95471,2002,'2020-08-09 10:27:22', 'checking', 3342.96, 1),
   (95472,2001,'2020-08-09 10:35:22', 'saving', 7000, 1),
   (95473,2001,'2020-08-09 10:38:22', 'checking', 5861.86, 1);
+
+
+DROP TABLE IF EXISTS `transactions`;
+CREATE TABLE `transactions` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `transaction_type` varchar(10) NOT NULL,
+  `transaction_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`transaction_id`),
+  KEY `transactions_FK` (`account_id`),
+  CONSTRAINT `transactions_FK` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
