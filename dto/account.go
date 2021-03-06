@@ -6,6 +6,12 @@ import (
 	"github.com/jonathanwamsley/banking/errs"
 )
 
+const (
+	MINIMUM_FUNDS = 5000.0
+	SAVING = "saving"
+	CHECKING = "checking"
+)
+
 // CreateAccountRequest must follow this format to create a new account
 type CreateAccountRequest struct {
 	CustomerID  string  `json:"customer_id"`
@@ -31,11 +37,19 @@ type GetAccountResponse struct {
 // a minimum amount of 5000
 // a saving or checking type
 func (r CreateAccountRequest) Validate() *errs.AppError {
-	if r.Amount < 5000 {
-		return errs.NewValidationError("To open a new account you need to deposit at least 5000.00")
+	if minimumFunds(r.Amount) {
+		return errs.NewValidationError("Minimum account amount is not met")
 	}
-	if strings.ToLower(r.AccountType) != "saving" && strings.ToLower(r.AccountType) != "checking" {
+	if validAccountType(r.AccountType) {
 		return errs.NewValidationError("Account type should be checking or saving")
 	}
 	return nil
+}
+
+func minimumFunds(amount float64) bool {
+	return amount < MINIMUM_FUNDS
+}
+
+func validAccountType(accountType string) bool {
+	return strings.ToLower(accountType) != SAVING && strings.ToLower(accountType) != CHECKING
 }
