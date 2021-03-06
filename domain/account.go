@@ -21,9 +21,12 @@ type Account struct {
 // AccountRepository implements:
 //
 // Save: creates a new account for a customer, and returns customer account id
+// ById: searches for accounts by a user_id
+// Delete: deletes an account using a customer id and account type
 type AccountRepository interface {
 	Save(Account) (*Account, *errs.AppError)
 	ByID(string) ([]Account, *errs.AppError)
+	Delete(id string, accountType string) *errs.AppError
 }
 
 // ToCreateAccountResponseDTO converts account from database to account response for user

@@ -59,6 +59,7 @@ func Start() {
 
 	router.HandleFunc("/customers/{customer_id:[0-9]+}/account", ah.CreateAccount).Methods(http.MethodPost)
 	router.HandleFunc("/customers/{customer_id:[0-9]+}/account", ah.GetAccount).Methods(http.MethodGet)
+	router.HandleFunc("/customers/{customer_id:[0-9]+}/account", ah.DeleteAccount).Methods(http.MethodDelete)
 
 	logger.Info(fmt.Sprintf("Starting server on %s ...", serverInfo))
 	log.Fatal(http.ListenAndServe(serverInfo, router))
