@@ -62,6 +62,9 @@ func Start() {
 	router.HandleFunc("/customers/{customer_id:[0-9]+}/account", ah.DeleteAccount).Methods(http.MethodDelete)
 	router.HandleFunc("/customers/{customer_id:[0-9]+}/account/{account_id:[0-9]+}", ah.MakeTransaction).Methods(http.MethodPost)
 
+	am := AuthMiddleware{domain.NewAuthRepository()}
+	router.Use(am.authorizationHandler())
+
 	logger.Info(fmt.Sprintf("Starting server on %s ...", serverInfo))
 	log.Fatal(http.ListenAndServe(serverInfo, router))
 }

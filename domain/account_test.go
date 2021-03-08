@@ -15,11 +15,11 @@ func TestToCreateAccountResponseDTO(t *testing.T) {
 
 func TestToGetAccountResponseDTO(t *testing.T) {
 	a := Account{
-		AccountID: "123",
-		CustomerID: "456",
+		AccountID:   "123",
+		CustomerID:  "456",
 		OpeningDate: "11-11-1111",
 		AccountType: "checking",
-		Amount: 1000,
+		Amount:      1000,
 	}
 	resp := a.ToGetAccountResponseDTO()
 	assert.Equal(t, "123", resp.AccountID)
@@ -31,9 +31,9 @@ func TestToGetAccountResponseDTO(t *testing.T) {
 
 func TestNewAccount(t *testing.T) {
 	a := dto.CreateAccountRequest{
-		CustomerID: "456",
+		CustomerID:  "456",
 		AccountType: "checking",
-		Amount: 1000,
+		Amount:      1000,
 	}
 	resp := NewAccount(a)
 	assert.Equal(t, "456", resp.CustomerID)
