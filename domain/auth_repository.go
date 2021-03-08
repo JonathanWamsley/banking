@@ -10,7 +10,7 @@ import (
 )
 
 type AuthRepository interface {
-	IsAuthorized(token string, vars map[string]string) bool
+	IsAuthorized(token string, routeName string, vars map[string]string) bool
 }
 
 type RemoteAuthRepository struct{}
@@ -19,8 +19,8 @@ func NewAuthRepository() RemoteAuthRepository {
 	return RemoteAuthRepository{}
 }
 
-func (r RemoteAuthRepository) IsAuthorized(token string, vars map[string]string) bool {
-	u := buildVerifyURL(token, vars)
+func (r RemoteAuthRepository) IsAuthorized(token string, routeName string, vars map[string]string) bool {
+	u := buildVerifyURL(token, routeName, vars)
 
 	if response, err := http.Get(u); err != nil {
 		logger.Error("Error while sending..." + err.Error())
@@ -38,10 +38,11 @@ func (r RemoteAuthRepository) IsAuthorized(token string, vars map[string]string)
 
 }
 
-func buildVerifyURL(token string, vars map[string]string) string {
+func buildVerifyURL(token string, routeName string, vars map[string]string) string {
 	u := url.URL{Host: "localhost:8181", Path: "/auth/verify", Scheme: "http"}
 	q := u.Query()
 	q.Add("token", token)
+	q.Add("routeName", routeName)
 	logger.Info(fmt.Sprintf("token received %s", token))
 	for k, v := range vars {
 		q.Add(k, v)
