@@ -1,0 +1,51 @@
+package domain
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/url"
+
+	"github.com/jonathanwamsley/banking/logger"
+)
+
+type AuthRepository interface {
+	IsAuthorized(token string, vars map[string]string) bool
+}
+
+type RemoteAuthRepository struct{}
+
+func NewAuthRepository() RemoteAuthRepository {
+	return RemoteAuthRepository{}
+}
+
+func (r RemoteAuthRepository) IsAuthorized(token string, vars map[string]string) bool {
+	u := buildVerifyURL(token, vars)
+
+	if response, err := http.Get(u); err != nil {
+		logger.Error("Error while sending..." + err.Error())
+		return false
+	} else {
+		logger.Info(fmt.Sprint("successfully sent a msg to auth api %s", response))
+		m := map[string]bool{}
+		if err = json.NewDecoder(response.Body).Decode(&m); err != nil {
+			logger.Error("Error while decoding response from auth server:" + err.Error())
+			return false
+		}
+		logger.Info("successfully received a message from auth api")
+		return m["isAuthorized"]
+	}
+
+}
+
+func buildVerifyURL(token string, vars map[string]string) string {
+	u := url.URL{Host: "localhost:8181", Path: "/auth/verify", Scheme: "http"}
+	q := u.Query()
+	q.Add("token", token)
+	logger.Info(fmt.Sprintf("token received %s", token))
+	for k, v := range vars {
+		q.Add(k, v)
+	}
+	u.RawQuery = q.Encode()
+	return u.String()
+}

@@ -8,8 +8,8 @@ import (
 
 const (
 	MINIMUM_FUNDS = 5000.0
-	SAVING = "saving"
-	CHECKING = "checking"
+	SAVING        = "saving"
+	CHECKING      = "checking"
 )
 
 // CreateAccountRequest must follow this format to create a new account
