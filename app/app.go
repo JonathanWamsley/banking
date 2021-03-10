@@ -53,12 +53,12 @@ func Start() {
 	ah := AccountHandler{service.NewAccountService(domain.NewAccountRepositoryDB(dbClient))}
 
 	router.HandleFunc("/customers", ch.GetAllCustomers).Methods(http.MethodGet).Name("GetCustomers")
-	router.HandleFunc("/customer", ch.CreateCustomer).Methods(http.MethodPost).Name("CreateCustomer")
-	router.HandleFunc("/customer/{customer_id:[0-9]+}", ch.GetCustomer).Methods(http.MethodGet).Name("GetCustomer")
-	router.HandleFunc("/customer/{customer_id:[0-9]+}", ch.DeleteCustomer).Methods(http.MethodDelete).Name("DeleteCustomer")
+	router.HandleFunc("/customers", ch.CreateCustomer).Methods(http.MethodPost).Name("CreateCustomer")
+	router.HandleFunc("/customers/{customer_id:[0-9]+}", ch.GetCustomer).Methods(http.MethodGet).Name("GetCustomer")
+	router.HandleFunc("/customers/{customer_id:[0-9]+}", ch.DeleteCustomer).Methods(http.MethodDelete).Name("DeleteCustomer")
 
-	router.HandleFunc("/customers/{customer_id:[0-9]+}/account", ah.CreateAccount).Methods(http.MethodPost).Name("CreateAccount")
 	router.HandleFunc("/customers/{customer_id:[0-9]+}/account", ah.GetAccount).Methods(http.MethodGet).Name("GetAccount")
+	router.HandleFunc("/customers/{customer_id:[0-9]+}/account", ah.CreateAccount).Methods(http.MethodPost).Name("CreateAccount")
 	router.HandleFunc("/customers/{customer_id:[0-9]+}/account", ah.DeleteAccount).Methods(http.MethodDelete).Name("DeleteAccount")
 	router.HandleFunc("/customers/{customer_id:[0-9]+}/account/{account_id:[0-9]+}", ah.MakeTransaction).Methods(http.MethodPost).Name("NewTransaction")
 

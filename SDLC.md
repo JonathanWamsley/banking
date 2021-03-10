@@ -62,6 +62,26 @@ Bellow are features that the banking application currently has and features that
     - [x] Get balance from any account
     - [x] Create new transactions
 
+		"admin": {"GetCustomer", "GetCustomers", "CreateCustomer", "CreateCustomer", "DeleteCustomer", "CreateAccount", "GetAccount", "DeleteAccount", "NewTransaction"},
+
+    Update: Some of the fields the customer should have to go through an admin to make certain calls. The new permissions have been changed to:
+
+- Customer needs
+    - [x] Login as a user
+    - [x] Get info from their customer account
+    - [x] Get balance from their banking account
+    - [x] Create a new transaction for their account
+- Admins needs
+    - [x] Login as an admin
+    - [x] Get a customer
+    - [x] Get customers
+    - [x] Create a customer
+    - [x] Delete a customer
+    - [x] Create an account
+    - [~] Delete an account
+    - [x] Get balance from any account
+    - [x] Create new transactions
+
 > security requirements
 
 - [x] The banking application uses a banking authorization api to create jwt. A 6 step process is used to allow a customer or admin to access the banking api. All of this has already been implemented.
