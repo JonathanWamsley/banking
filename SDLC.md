@@ -9,7 +9,7 @@
 5. [Testing]("#5-header)
 6. [Deployment]("#6-header)
 7. [Maintenance and improvement]("#7-header)
-8. [Time Log(personal use)]("#8-header)
+8. [Wrap up]("#8-header)
 <hr></hr>
 
 A software development life cycle helps produce high-quality software quickly by following a procedure targeting key stages.
@@ -203,8 +203,25 @@ Creating a guide how to build and deploy application for new users will be docum
 Future improvements that can be made will be mentioned, mainly focusing on deployment and api end points.
 
 
-<h3 id="8-header"> 8. Time Log</h3>
+<h3 id="8-header"> 8. Wrap Up</h3>
 
-- 18 hours going through Banking tutorial
-- 4 hours reading about SDLC and documenting
+Roles have been changed an now customer only has
+- Customer needs
+    - [x] Get customer account
+    - [x] Login as a user
+    - [x] Get balance from their account
+    - [x] Create a new transaction for their account
+- Admins needs
+    - [x] Delete a customer
+    - [x] Create an account
+    - [x] Delete an account
+    - [x] Login as an admin
+    - [x] Get a customer
+    - [x] Get customers
+    - [x] Get balance from any account
+    - [x] Create new transactions
 
+Deadlines not met
+- update customer/account profiles
+- password security was not finished. bcrypt hashing can still be implemented.
+- more documentation could be done. In the future, openapi /swagger can help communicate and organize api endpoints
